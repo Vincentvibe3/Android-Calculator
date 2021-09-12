@@ -5,7 +5,8 @@
     <item
         android:id="@+id/navigation_calculator"
         android:icon="@drawable/ic_calculate_black_24dp"
-        android:title="@string/Calculator" />
+        android:title="@string/Calculator"
+        android:fontFamily="@font/montserrat" />
 
     <item
         android:id="@+id/navigation_convert"

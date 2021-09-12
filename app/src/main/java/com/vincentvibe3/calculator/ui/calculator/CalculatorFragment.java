@@ -73,13 +73,13 @@ public class CalculatorFragment extends Fragment {
 
     public boolean addToEquation(String valueToAdd,int cursorStart, int cursorEnd){
         String previousChar;
-        if (!"*.-÷+".contains(formatEq(valueToAdd))){
+        if (!"*.-/+".contains(formatEq(valueToAdd))){
             eqview.getText().insert(cursorStart, valueToAdd);
             return true;
         } else {
             if (cursorEnd!=0){
                 previousChar = formatEq(String.valueOf(eqview.getText().charAt(cursorEnd-1)));
-                if (!"*.-÷+".contains(previousChar)){
+                if (!"*.-/+".contains(previousChar)){
                     eqview.getText().insert(cursorStart, valueToAdd);
                     return true;
                 } else if (valueToAdd.equals("-")&&!previousChar.equals("-")){
@@ -128,30 +128,34 @@ public class CalculatorFragment extends Fragment {
         colorAnimation.start();
     }
 
-    public boolean checkValid(String equation){
-        equation = formatEq(equation);
-        Pattern operatorsEnd = Pattern.compile("[*/+-]$");
-        Pattern operatorsStart = Pattern.compile("^[*./+]");
-        Pattern op2op = Pattern.compile("[/*+.-][/*+.]");
-        Pattern doubleMinus = Pattern.compile("--");
-        boolean doubleMinusValid = !doubleMinus.matcher(equation).find();
-        boolean midValid = !op2op.matcher(equation).find();
-        boolean startValid = !operatorsStart.matcher(equation).find();
-        boolean endValid = !operatorsEnd.matcher(equation).find();
-        return startValid&&endValid&&midValid&&doubleMinusValid;
-    }
+//    public boolean checkValid(String equation){
+//        equation = formatEq(equation);
+//        Pattern operatorsEnd = Pattern.compile("[*/+-]$");
+//        Pattern operatorsStart = Pattern.compile("^[*./+]");
+//        Pattern op2op = Pattern.compile("[/*+.-][/*+.]");
+//        Pattern doubleMinus = Pattern.compile("--");
+//        boolean doubleMinusValid = !doubleMinus.matcher(equation).find();
+//        boolean midValid = !op2op.matcher(equation).find();
+//        boolean startValid = !operatorsStart.matcher(equation).find();
+//        boolean endValid = !operatorsEnd.matcher(equation).find();
+//        return startValid&&endValid&&midValid&&doubleMinusValid;
+//    }
 
     public void getFinalAns(){
         String equation = eqview.getText().toString();
-        if (!checkValid(equation)){
+        String ans = Calculator.calculate(formatEq(equation));
+        if (equation.isEmpty()) {
+            eqview.setText("");
+        }else if (ans.equals("Bad expression")){
             ansview.setText("Bad expression");
             textViewChangeColor(ansview, ansview.getCurrentTextColor(), getContext().getColor(R.color.error));
             textViewChangeColor(eqview, ansview.getCurrentTextColor(), getContext().getColor(R.color.error));
-        }else if (equation.isEmpty()){
-            eqview.setText("");
+        }else if (ans == "Undefined"){
+            textViewChangeColor(ansview, ansview.getCurrentTextColor(), getContext().getColor(R.color.error));
+            textViewChangeColor(eqview, ansview.getCurrentTextColor(), getContext().getColor(R.color.error));
         }else {
             finalAns = true;
-            eqview.setText(Calculator.main(formatEq(equation)));
+            eqview.setText(ans);
         }
 
     }
@@ -275,13 +279,17 @@ class TextListener implements TextWatcher{
     @Override
     public void afterTextChanged(Editable s) {
         String equation = calc.formatEq(calc.eqview.getText().toString());
+        String ans = Calculator.calculate(calc.formatEq(equation));
+        boolean valid = !ans.equals("Bad expression");
         calc.textViewChangeColor(calc.ansview, calc.ansview.getCurrentTextColor(), calc.defaultAnsColor);
         calc.textViewChangeColor(calc.eqview, calc.eqview.getCurrentTextColor(), calc.defaultEqColor);
         if (equation.equals("")){
             calc.ansview.setText(equation);
-        } else if (calc.checkValid(equation)&&!calc.finalAns){
-            calc.ansview.setText(Calculator.main(equation));
-        } else if (calc.finalAns&&calc.checkValid(equation)){
+        } else if (valid&&!calc.finalAns){
+            calc.ansview.setText(Calculator.calculate(equation));
+        } else if (calc.finalAns&&valid){
+            calc.ansview.setText("");
+        } else {
             calc.ansview.setText("");
         }
     }

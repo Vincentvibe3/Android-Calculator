@@ -19,10 +19,22 @@ public class Calculator {
     static Pattern exponentOp = Pattern.compile("^", Pattern.LITERAL);
     static Pattern numeric = Pattern.compile("[0-9]");
 
-    public static String main(String equation){
-        equation = exponents(equation);
-        equation = multiplyDivide(equation);
-        equation = addSubstract(equation);
+    public static void main(String[] args){
+        String equation = "6/";
+        String ans = calculate(equation);
+        System.out.println(ans);
+    }
+
+    public static String calculate(String equation){
+
+        try {
+            equation = exponents(equation);
+            equation = multiplyDivide(equation);
+            equation = addSubstract(equation);
+        } catch (NumberFormatException | NullPointerException | badExpression e){
+            return "Bad expression";
+        }
+
         return finalFormat(equation);
     }
 
@@ -62,7 +74,7 @@ public class Calculator {
         }
     }
 
-    public static String addSubstract(String equation){
+    public static String addSubstract(String equation) throws badExpression{
         BigDecimal ans = BigDecimal.ZERO;
         if (equation==null){
             return null;
@@ -73,6 +85,8 @@ public class Calculator {
 
             } else if (numeric.matcher(value).find()){
                 ans = ans.add(new BigDecimal(value));
+            } else {
+                throw new badExpression();
             }
         }
         equation = substitute(equation, equation, ans);
@@ -80,15 +94,20 @@ public class Calculator {
         return equation;
     }
 
-    public static BigDecimal divide(String equation){
+    public static BigDecimal divide(String equation) throws badExpression{
         BigDecimal ans = null;
         String[] nums = divisionOp.split(equation);
+        if (nums.length<=1){
+            throw new badExpression();
+        }
         for (int i=0; i< nums.length; i++){
             if (i==0){
                 if (nums[i].contains("x")){
                     ans = getSub(nums[i]);
                 } else if (numeric.matcher(nums[i]).find()){
                     ans = new BigDecimal(nums[i]);
+                }else {
+                    throw new badExpression();
                 }
             } else {
                 try{
@@ -96,6 +115,8 @@ public class Calculator {
                         ans = ans.divide(getSub(nums[i]), defaultMathContext);
                     } else if (numeric.matcher(nums[i]).find()){
                         ans = ans.divide(new BigDecimal(nums[i]), defaultMathContext);
+                    } else {
+                        throw new badExpression();
                     }
                 } catch (ArithmeticException e) {
                     return null;
@@ -107,9 +128,12 @@ public class Calculator {
         return ans;
     }
 
-    public static BigDecimal multiply(String equation){
+    public static BigDecimal multiply(String equation) throws badExpression{
         BigDecimal ans = BigDecimal.ONE;
         String[] multiplyToDo = multiplyOp.split(equation);
+        if (multiplyToDo.length==0){
+            throw new badExpression();
+        }
         for (String num : multiplyToDo){
             boolean isdivision = divisionOp.matcher(num).find();
             //check if the chain contains a division
@@ -126,6 +150,8 @@ public class Calculator {
                     ans = ans.multiply(getSub(num));
                 } else if (numeric.matcher(num).find()){
                     ans = ans.multiply(new BigDecimal(num));
+                } else {
+                    throw new badExpression();
                 }
 
             }
@@ -133,7 +159,7 @@ public class Calculator {
         return ans;
     }
 
-    public static String multiplyDivide(String equation){
+    public static String multiplyDivide(String equation) throws badExpression{
         BigDecimal ans = BigDecimal.ONE;
         //isolate multiplications
         equation = equation.replaceAll(subtractionOp.pattern(), "+-");
@@ -181,5 +207,12 @@ public class Calculator {
 
         }
         return equation;
+    }
+}
+
+class badExpression extends Exception {
+
+    public badExpression() {
+
     }
 }
