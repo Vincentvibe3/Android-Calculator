@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navigation_calculator"
+        android:icon="@drawable/ic_calculate_black_24dp"
+        android:title="@string/Calculator" />
+
+    <item
+        android:id="@+id/navigation_convert"
+        android:icon="@drawable/ic_swap_horiz_black_24dp"
+        android:title="@string/Conversion" />
+
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="@string/Settings" />
+
+</menu>
